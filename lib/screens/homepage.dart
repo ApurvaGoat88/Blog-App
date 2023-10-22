@@ -24,7 +24,7 @@ class _HomepageState extends State<Homepage> {
     return Scaffold(
       backgroundColor: Constant().plat,
       appBar: AppBar(
-        elevation: 0,
+        elevation: 5,
         backgroundColor: Constant().plat,
         title: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -34,7 +34,8 @@ class _HomepageState extends State<Homepage> {
                 children: [
                   TextSpan(
                     text: 'log App',
-                    style: GoogleFonts.ubuntu(color: Colors.black),
+                    style: GoogleFonts.ubuntu(
+                        color: Colors.black, fontWeight: FontWeight.bold),
                   )
                 ],
                 style: GoogleFonts.ubuntu(
@@ -44,25 +45,28 @@ class _HomepageState extends State<Homepage> {
           ),
         ),
         actions: [
-          Container(
-            margin: EdgeInsets.only(right: 20),
-            child: Card(
-              color: Constant().plat,
-              shape: CircleBorder(),
-              child: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: IconButton(
-                    onPressed: () {},
-                    icon: SvgPicture.asset('assets/grid-svgrepo-com.svg')),
-              ),
-            ),
-          )
+          current_index == 0
+              ? Container(
+                  margin: EdgeInsets.only(right: 20),
+                  child: Card(
+                    color: Constant().plat,
+                    shape: CircleBorder(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: IconButton(
+                          onPressed: () {},
+                          icon:
+                              SvgPicture.asset('assets/grid-svgrepo-com.svg')),
+                    ),
+                  ),
+                )
+              : Center(),
         ],
       ),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Container(
-          height: h,
+          height: h * 0.8,
           color: Constant().plat,
           child: list[current_index],
         ),
