@@ -1,3 +1,4 @@
+import 'package:blog_app/constant/constant.dart';
 import 'package:flutter/material.dart';
 
 class ExploreBlogs extends StatefulWidget {
@@ -11,7 +12,9 @@ class _ExploreBlogsState extends State<ExploreBlogs> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Center(child: Text('explore')),
+      width: double.infinity,
+      color: Constant().plat,
+      child: Text('explore'),
     );
   }
 }

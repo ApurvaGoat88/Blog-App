@@ -22,6 +22,7 @@ class _HomepageState extends State<Homepage> {
     final h = MediaQuery.sizeOf(context).height;
 
     return Scaffold(
+      backgroundColor: Constant().plat,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Constant().plat,
@@ -59,6 +60,7 @@ class _HomepageState extends State<Homepage> {
         ],
       ),
       body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Container(
           height: h,
           color: Constant().plat,
@@ -66,7 +68,7 @@ class _HomepageState extends State<Homepage> {
         ),
       ),
       bottomNavigationBar: CurvedNavigationBar(
-          backgroundColor: Constant().plat,
+          backgroundColor: Colors.transparent,
           height: h * 0.07,
           buttonBackgroundColor: Colors.pink.shade200,
           animationDuration: Duration(milliseconds: 500),
