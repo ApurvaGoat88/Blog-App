@@ -31,3 +31,127 @@ app.route("/").get((req,res)=>res.json("This is Suhani Sahu,I am a Talentless Gi
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+
+
+
+
+/ authRoutes.js
+const express = require('express');
+const authcontroller = require('../controllers/authcontroller');
+const passport = require('passport');
+const router = express.Router();
+const authmiddleware = require('../middleware/authmiddleware');
+
+router.post('/signup', authcontroller.signup);
+router.post('/login', authcontroller.login);
+
+router.get('/success', authcontroller.success);
+router.get('/failure', authcontroller.failure);
+
+router.get('/profile', authMiddleware, authController.getProfile);
+
+module.exports = router;
+
+
+// blogController.js
+const Blog = require('../models/blog');
+
+exports.getAllBlogs = async (req, res) => {
+  try {
+    const blogs = await Blog.find();
+    res.json(blogs);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+exports.createBlog = async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const blog = new Blog({ title, content });
+    await blog.save();
+    res.status(201).json(blog);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ message: 'Internal Server Error' });
+}
+};
+
+exports.updateBlog = async (req, res) => {
+try {
+  const { title, content } = req.body;
+  const blogId = req.params.blogId;
+
+  const updatedBlog = await Blog.findByIdAndUpdate(
+    blogId,
+    { title, content },
+    { new: true }
+  );
+
+  if (!updatedBlog) {
+    return res.status(404).json({ message: 'Blog not found' });
+  }
+
+  res.json(updatedBlog);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ message: 'Internal Server Error' });
+}
+};
+
+exports.deleteBlog = async (req, res) => {
+try {
+  const blogId = req.params.blogId;
+
+  const deletedBlog = await Blog.findByIdAndDelete(blogId);
+
+  if (!deletedBlog) {
+    return res.status(404).json({ message: 'Blog not found' });
+  }
+
+  res.json({ message: 'Blog deleted successfully' });
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ message: 'Internal Server Error' });
+}
+};
+
+
+//blogroutes.js
+
+const express = require('express');
+const blogController = require('../controllers/blogController');
+const router = express.Router();
+
+router.get('/blogs', blogController.getAllBlogs);
+router.post('/blogs', blogController.createBlog);
+router.put('/blogs/:blogId', blogController.updateBlog);
+router.delete('/blogs/:blogId', blogController.deleteBlog);
+
+module.exports = router;
+
+
+// middleware/authMiddleware.js
+
+const jwt = require('jsonwebtoken');
+const { secretKey } = require('../config');
+
+const authMiddleware = (req, res, next) => {
+  const token = req.headers.authorization;
+
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, 'secret_key');
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
+};
+
+module.exports = authMiddleware;

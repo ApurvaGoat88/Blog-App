@@ -1,4 +1,4 @@
 module.exports = {
-    sessionSecret: 'your-secret-key',
+    sessionSecret: 'suhani_bdcoe123',
   };
   

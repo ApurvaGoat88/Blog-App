@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -13,22 +13,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/blogging-platform', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-// Create a new MongoStore instance
-const sessionStore = new MongoStore({ mongooseConnection: mongoose.connection });
-
-// Use express-session
+// Use express-session middleware
 app.use(
   session({
     secret: 'your-secret-key', // Replace with a strong and secure secret key
     resave: false,
     saveUninitialized: true,
-    store: sessionStore,
+    store: MongoStore.create({ mongoUrl: 'mongodb://127.0.0.1:27017/blogging-platform' }),
     cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }, // Session will expire after 30 days
   })
 );
@@ -36,23 +27,17 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Connect to MongoDB
+mongoose.connect('mongodb://127.0.0.1:27017/blogging-platform', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
 // Passport Local Strategy
 passport.use(
   new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
     try {
-      const user = await User.findOne({ email });
-
-      if (!user) {
-        return done(null, false, { message: 'Incorrect email.' });
-      }
-
-      const passwordMatch = await bcrypt.compare(password, user.password);
-
-      if (!passwordMatch) {
-        return done(null, false, { message: 'Incorrect password.' });
-      }
-
-      return done(null, user);
+      // ... (rest of the strategy)
     } catch (error) {
       return done(error);
     }
@@ -66,8 +51,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findById(id);
-    done(null, user);
+    // ... (rest of deserialization)
   } catch (error) {
     done(error);
   }
@@ -77,7 +61,11 @@ passport.deserializeUser(async (id, done) => {
 app.use('/api', authroutes);
 app.use('/api', blogroutes);
 
-const PORT = process.env.PORT || 5000;
+app.get('/', (req, res) => {
+  res.send('Hello, this is the root path!!');
+});
+
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
