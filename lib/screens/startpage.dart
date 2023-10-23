@@ -1,5 +1,6 @@
 import 'package:blog_app/constant/constant.dart';
 import 'package:blog_app/provider/blog_provider.dart';
+import 'package:blog_app/screens/Loginpage.dart';
 import 'package:blog_app/screens/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -73,7 +74,7 @@ class _StartPageState extends State<StartPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (context) => Homepage()));
+                          MaterialPageRoute(builder: (context) => LoginPage()));
                     },
                     child: Text(
                       'Get Started',

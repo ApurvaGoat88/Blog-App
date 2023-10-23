@@ -96,7 +96,7 @@ class _FormAreaState extends State<FormArea> {
                             borderSide: BorderSide(color: Constant().blue)),
                         disabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Constant().blue))),
-                    maxLines: 8)),
+                    maxLines: 5)),
             Container(
               margin: EdgeInsets.only(top: h * 0.02),
               alignment: Alignment.center,
