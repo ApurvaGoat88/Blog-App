@@ -1,7 +1,9 @@
+import 'package:blog_app/Auth/auth.dart';
 import 'package:blog_app/constant/constant.dart';
 import 'package:blog_app/screens/crud_blog.dart';
 import 'package:blog_app/screens/exploreblog.dart';
 import 'package:blog_app/screens/profile.dart';
+import 'package:blog_app/screens/startpage.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -61,6 +63,30 @@ class _HomepageState extends State<Homepage> {
                   ),
                 )
               : Center(),
+          current_index == 2
+              ? Container(
+                  margin: EdgeInsets.only(right: 20),
+                  child: Card(
+                    color: Constant().plat,
+                    shape: CircleBorder(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: IconButton(
+                          onPressed: () async {
+                            await Auth().signOut();
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) => StartPage())));
+                          },
+                          icon: Icon(
+                            Icons.logout_rounded,
+                            color: Colors.black,
+                          )),
+                    ),
+                  ),
+                )
+              : Center()
         ],
       ),
       body: SingleChildScrollView(

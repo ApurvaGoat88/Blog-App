@@ -13,8 +13,12 @@ class Auth {
   }
 
   Future<void> signUp({required String email, required String pass}) async {
-    await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email, password: pass);
+    try {
+      await _firebaseAuth.createUserWithEmailAndPassword(
+          email: email, password: pass);
+    } catch (e) {
+      print('error');
+    }
   }
 
   Future<void> signOut() async {

@@ -1,29 +1,47 @@
+import 'package:blog_app/Auth/auth.dart';
 import 'package:blog_app/constant/constant.dart';
+import 'package:blog_app/model/usermodel.dart';
+import 'package:blog_app/provider/user-provider.dart';
+import 'package:blog_app/screens/Loginpage.dart';
 import 'package:blog_app/screens/homepage.dart';
-import 'package:blog_app/screens/sigup.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_login/flutter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class SignUP extends StatefulWidget {
+  const SignUP({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignUP> createState() => _SignUPState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  Future<void> resetPassword(String email) async {
+class _SignUPState extends State<SignUP> {
+  @override
+  void initState() {
+    super.initState();
+    FirebaseFirestore.instance;
+  }
+
+  final userProvider = UserProvider();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> addDatatoFireStore(UserModel user) async {
+    print('addiing data');
+    CollectionReference _db = _firestore.collection('Users');
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('We Have sent you a mail for password reset')));
+      Map<String, dynamic> data = {
+        'name': user.author,
+        'email': user.email,
+        'password': user.password,
+      };
+      await _db.add(data);
+      print('added');
     } catch (e) {
-      // Handle errors here
-      print('Error: $e');
+      print('$e');
     }
   }
 
@@ -48,23 +66,38 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  User? get currentUser => _firebaseAuth.currentUser;
-  Future<void> signIn({required String email, required String pass}) async {
+  Future<void> signUp({required String email, required String pass}) async {
     try {
-      await _firebaseAuth.signInWithEmailAndPassword(
+      await _firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: pass);
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => Homepage()));
     } on FirebaseAuthException catch (e) {
-      print(e.toString());
-
-      // ignore: unnecessary_null_comparison
+      if (e.code == 'email-already-in-use') {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Email Already in Use')));
+      }
+      if (e.code == 'weak-password') {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Please check the provided password')));
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Something went Wrong')));
+      }
+      if (_pass.text != _cpass.text) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Password didnt Match')));
+      }
     }
   }
 
-  bool obs = true;
+  bool _obs = true;
+  bool _obs2 = true;
   TextEditingController _email = TextEditingController();
   TextEditingController _pass = TextEditingController();
+  TextEditingController _cpass = TextEditingController();
+  TextEditingController _author = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final h = MediaQuery.sizeOf(context).height;
@@ -80,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: h,
                 width: w,
                 child: SvgPicture.asset(
-                  'assets/Android Large - 1.svg',
+                  'assets/iPhone 14 & 15 Pro - 1.svg',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -90,10 +123,10 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: BoxDecoration(
                       color: Constant().plat,
                       borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(h * 0.08),
-                          bottomLeft: Radius.circular(h * 0.08))),
+                          topLeft: Radius.circular(h * 0.08),
+                          bottomRight: Radius.circular(h * 0.08))),
                   height: h * 0.7,
-                  width: w,
+                  // ignore: sort_child_properties_last
                   child: Form(
                       key: UniqueKey(),
                       child: Container(
@@ -104,21 +137,63 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Text(
-                              'Login ',
+                              'Sign Up',
                               style: GoogleFonts.ubuntu(
                                   fontSize: h * 0.05,
                                   fontWeight: FontWeight.bold,
                                   color: Constant().vio),
                             ),
-                            Container(
-                                child: Column(
+                            TextFormField(
+                                cursorColor: Constant().blue,
+                                validator: (text) {
+                                  if (text == null ||
+                                      text.isEmpty ||
+                                      text.length <= 6) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Password must be more than 6 letters')));
+                                    return 'Password must be more than 6 letters';
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                                controller: _author,
+                                decoration: InputDecoration(
+                                    suffixIcon: IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(
+                                          Icons.person,
+                                          color: Colors.black,
+                                        )),
+                                    hintText: 'Author Name',
+                                    hintStyle: GoogleFonts.ubuntu(
+                                        color: Constant().blue),
+                                    labelStyle: GoogleFonts.ubuntu(
+                                        color: Constant().blue),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Constant().blue)),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Constant().blue)),
+                                    disabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Constant().blue))),
+                                maxLines: 1),
+                            Column(
                               children: [
                                 Container(
-                                    margin: EdgeInsets.symmetric(
-                                        vertical: h * 0.03),
+                                    margin: EdgeInsets.only(bottom: h * 0.01),
                                     child: TextFormField(
+                                        keyboardType:
+                                            TextInputType.emailAddress,
                                         validator: (text) {
                                           if (text == null || text.isEmpty) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                                    content: Text(
+                                                        'Enter a AuthorName')));
                                             return 'Title Must not be Empty';
                                           } else {
                                             return null;
@@ -149,27 +224,34 @@ class _LoginPageState extends State<LoginPage> {
                                     child: TextFormField(
                                         cursorColor: Constant().blue,
                                         validator: (text) {
-                                          if (text == null || text.isEmpty) {
-                                            return 'Content Must not be Empty';
+                                          if (text == null ||
+                                              text.isEmpty ||
+                                              text.length <= 6) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                                    content: Text(
+                                                        'Password must be more than 6 letters')));
+                                            return 'Password must be more than 6 letters';
                                           } else {
                                             return null;
                                           }
                                         },
                                         controller: _pass,
-                                        obscureText: obs,
-                                        onSaved: (text) {},
+                                        obscureText: _obs,
                                         decoration: InputDecoration(
                                             suffixIcon: IconButton(
                                                 onPressed: () {
-                                                  setState(() {
-                                                    obs = !obs;
-                                                  });
+                                                  _obs = !_obs;
+                                                  setState(() {});
                                                 },
-                                                icon: Icon(obs
-                                                    ? Icons
-                                                        .remove_red_eye_outlined
-                                                    : Icons.remove_red_eye)),
-                                            hintText: 'Enter Password',
+                                                icon: Icon(
+                                                  _obs
+                                                      ? Icons
+                                                          .remove_red_eye_outlined
+                                                      : Icons.remove_red_eye,
+                                                  color: Colors.black,
+                                                )),
+                                            hintText: 'Create a Password',
                                             hintStyle: GoogleFonts.ubuntu(
                                                 color: Constant().blue),
                                             labelStyle: GoogleFonts.ubuntu(
@@ -184,36 +266,86 @@ class _LoginPageState extends State<LoginPage> {
                                                 borderSide: BorderSide(
                                                     color: Constant().blue))),
                                         maxLines: 1)),
-                                Row(
-                                  children: [
-                                    TextButton(
-                                        onPressed: () async {
-                                          if (_email.text.length != 0 &&
-                                              _email.text.contains('@')) {
-                                            await resetPassword(_email.text);
-                                          } else {
+                                Container(
+                                    margin: EdgeInsets.only(top: h * 0.01),
+                                    child: TextFormField(
+                                        cursorColor: Constant().blue,
+                                        validator: (text) {
+                                          if (text == null ||
+                                              text.isEmpty ||
+                                              text.length <= 6) {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(SnackBar(
                                                     content: Text(
-                                                        'Enter a Valid email')));
+                                                        'Password must be more than 6 letters')));
+                                            return 'Password must be more than 6 letters';
+                                          } else {
+                                            return null;
                                           }
                                         },
-                                        child: Text('Forgot Password')),
-                                  ],
-                                ),
+                                        controller: _cpass,
+                                        obscureText: _obs2,
+                                        onSaved: (text) {},
+                                        decoration: InputDecoration(
+                                            suffixIcon: IconButton(
+                                                onPressed: () {
+                                                  _obs2 = !_obs2;
+                                                  setState(() {});
+                                                },
+                                                icon: Icon(
+                                                  _obs2
+                                                      ? Icons
+                                                          .remove_red_eye_outlined
+                                                      : Icons.remove_red_eye,
+                                                  color: Colors.black,
+                                                )),
+                                            hintText: 'Re-Enter Password',
+                                            hintStyle: GoogleFonts.ubuntu(
+                                                color: Constant().blue),
+                                            labelStyle: GoogleFonts.ubuntu(
+                                                color: Constant().blue),
+                                            enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Constant().blue)),
+                                            focusedBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Constant().blue)),
+                                            disabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Constant().blue))),
+                                        maxLines: 1)),
                                 Container(
                                   margin: EdgeInsets.only(top: h * 0.02),
                                   alignment: Alignment.center,
                                   child: ElevatedButton(
                                     onPressed: () async {
-                                      if (_email.text != _pass.text) {
-                                        await signIn(
+                                      if (_pass.text == _cpass.text) {
+                                        UserModel user = UserModel(
+                                            author: _author.text,
+                                            email: _email.text,
+                                            password: _pass.text);
+                                        FirebaseDatabase.instance
+                                            .reference()
+                                            .child("users")
+                                            .push()
+                                            .set({
+                                          "name": user.author,
+                                          "pass": user.password,
+                                          "eamil": user.email
+                                        });
+
+                                        await signUp(
                                             email: _email.text,
                                             pass: _pass.text);
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Password is not Same')));
                                       }
                                     },
                                     child: Text(
-                                      'Login',
+                                      'Sign Up',
                                       style: GoogleFonts.ubuntu(
                                           fontWeight: FontWeight.w500),
                                     ),
@@ -228,7 +360,7 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 )
                               ],
-                            )),
+                            ),
                             Card(
                               elevation: 10,
                               child: Container(
@@ -237,6 +369,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: InkWell(
                                   onTap: () async {
                                     User? user = await signInWithGoogle();
+
                                     if (user != null) {
                                       Navigator.pushReplacement(
                                           context,
@@ -266,20 +399,22 @@ class _LoginPageState extends State<LoginPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('New User?'),
+                                Text('Already a User ?'),
                                 TextButton(
                                     onPressed: () {
                                       Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) => SignUP()));
+                                              builder: (context) =>
+                                                  LoginPage()));
                                     },
-                                    child: Text('Create Account'))
+                                    child: Text('Login'))
                               ],
                             )
                           ],
                         ),
                       )),
+                  width: w,
                 ),
                 bottom: h * 0.08,
               )
