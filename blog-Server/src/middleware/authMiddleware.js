@@ -8,6 +8,7 @@ const authMiddleware = (req, res, next) => {
   const token = req.header('Authorization');
 
   if (!token) {
+    console.log('Unauthorized - No token provided');
     return res.status(401).json({ error: 'Unauthorized - No token provided' });
   }
 
@@ -17,6 +18,9 @@ const authMiddleware = (req, res, next) => {
 
     // Attach the decoded user information to the request object
     req.user = decoded.user;
+
+    console.log('Token verified successfully:', decoded.user);
+
     next(); // Continue to the next middleware or route handler
   } catch (error) {
     console.error(error);

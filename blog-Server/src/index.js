@@ -16,7 +16,7 @@ app.use(express.json());
 // Use express-session middleware
 app.use(
   session({
-    secret: 'your-secret-key', // Replace with a strong and secure secret key
+    secret: 'bdcoe.akgec123', // Replace with a strong and secure secret key
     resave: false,
     saveUninitialized: true,
     store: MongoStore.create({ mongoUrl: 'mongodb://127.0.0.1:27017/blogging-platform' }),
@@ -65,7 +65,7 @@ app.get('/', (req, res) => {
   res.send('Hello, this is the root path!!');
 });
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

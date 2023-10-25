@@ -7,10 +7,22 @@ const authMiddleware = require('../middleware/authMiddleware');
 const blogController = require('../controllers/blogController');
 
 router.post('/signup', authController.signup);
+
+// Login route
 router.post('/login', authController.login);
+
+// Login with Google route (example)
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+// Callback route for Google login
+router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/failure' }), (req, res) => {
+  res.redirect('/success');
+});
+
 
 router.get('/success', authController.success);
 router.get('/failure', authController.failure);
+
 
 // Create a comment on a blog
 router.post('/blogs/:blogId/comments', authMiddleware, blogController.createComment);

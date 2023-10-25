@@ -7,8 +7,12 @@ exports.createBlog = async (req, res) => {
     const { title, content } = req.body;
     const author = req.user.userId;
 
+    console.log('Received request to create a new blog:', { title, content, author });
+
     const blog = new Blog({ title, content, author });
     await blog.save();
+
+    console.log('Blog created successfully:', blog);
 
     res.json({ message: 'Blog created successfully', blog });
   } catch (error) {
