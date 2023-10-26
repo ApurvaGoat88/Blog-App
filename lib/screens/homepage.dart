@@ -18,7 +18,7 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   int current_index = 0;
-  List<Widget> list = <Widget>[ExploreBlogs(), BlogsCreate(), Profile()];
+  List<Widget> list = <Widget>[ExploreBlogs(), BlogsCreate(), ProfilePage()];
   @override
   Widget build(BuildContext context) {
     final h = MediaQuery.sizeOf(context).height;

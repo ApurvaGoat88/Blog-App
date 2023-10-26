@@ -3,6 +3,7 @@ import 'package:blog_app/constant/constant.dart';
 import 'package:blog_app/constant/google.dart';
 import 'package:blog_app/screens/homepage.dart';
 import 'package:blog_app/screens/sigup.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -79,6 +80,25 @@ class _LoginPageState extends State<LoginPage> {
       return null;
     }
   }
+  Future<void> addDataToFirestore(String email , String username ) async {
+  try {
+    final firestoreInstance = FirebaseFirestore.instance;
+
+  
+    Map<String, dynamic> data = {
+      'name': username,
+      'email': email ,
+      
+    };
+
+    
+    await firestoreInstance.collection('Users').doc(email).set(data);
+
+    print('Data added to Firestore');
+  } catch (e) {
+    print('Error adding data to Firestore: $e');
+  }
+}
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   User? get currentUser => _firebaseAuth.currentUser;
@@ -249,6 +269,7 @@ class _LoginPageState extends State<LoginPage> {
                                   child: ElevatedButton(
                                     onPressed: () async {
                                       if (_formKey.currentState!.validate()) {
+                                        
                                         await Auth().signIn(
                                             email: _email.text,
                                             pass: _pass.text);

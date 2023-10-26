@@ -49,6 +49,24 @@ class _SignUPState extends State<SignUP> {
     }
   }
 
+  Future<void> addDataToFirestore(String email, String username) async {
+    try {
+      final firestoreInstance = FirebaseFirestore.instance;
+
+      Map<String, dynamic> data = {
+        'name': username,
+        'email': email,
+        'UserId': email.split('@')[0].toString()
+      };
+
+      await firestoreInstance.collection('Users').doc(email).set(data);
+
+      print('Data added to Firestore');
+    } catch (e) {
+      print('Error adding data to Firestore: $e');
+    }
+  }
+
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   Future<void> signUp({required String email, required String pass}) async {
     try {
@@ -305,6 +323,8 @@ class _SignUPState extends State<SignUP> {
                                   child: ElevatedButton(
                                     onPressed: () async {
                                       if (_pass.text == _cpass.text) {
+                                        await addDataToFirestore(
+                                            _email.text, _author.text);
                                         await signUp(
                                             email: _email.text,
                                             pass: _pass.text);
@@ -347,6 +367,9 @@ class _SignUPState extends State<SignUP> {
                                   User? user = await signInWithGoogle();
 
                                   if (user != null) {
+                                    await addDataToFirestore(
+                                        user!.email.toString(),
+                                        user.displayName.toString());
                                     Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
