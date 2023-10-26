@@ -29,22 +29,6 @@ class _SignUPState extends State<SignUP> {
   final userProvider = UserProvider();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> addDatatoFireStore(UserModel user) async {
-    print('addiing data');
-    CollectionReference _db = _firestore.collection('Users');
-    try {
-      Map<String, dynamic> data = {
-        'name': user.author,
-        'email': user.email,
-        'password': user.password,
-      };
-      await _db.add(data);
-      print('added');
-    } catch (e) {
-      print('$e');
-    }
-  }
-
   Future<User?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -85,6 +69,7 @@ class _SignUPState extends State<SignUP> {
             .showSnackBar(SnackBar(content: Text('Something went Wrong')));
       }
       if (_pass.text != _cpass.text) {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Password didnt Match')));
       }
@@ -125,7 +110,7 @@ class _SignUPState extends State<SignUP> {
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(h * 0.08),
                           bottomRight: Radius.circular(h * 0.08))),
-                  height: h * 0.7,
+                  height: h * 0.8,
                   // ignore: sort_child_properties_last
                   child: Form(
                       key: UniqueKey(),
@@ -320,26 +305,12 @@ class _SignUPState extends State<SignUP> {
                                   child: ElevatedButton(
                                     onPressed: () async {
                                       if (_pass.text == _cpass.text) {
-                                        UserModel user = UserModel(
-                                            author: _author.text,
-                                            email: _email.text,
-                                            password: _pass.text);
-                                        FirebaseDatabase.instance
-                                            .reference()
-                                            .child("users")
-                                            .push()
-                                            .set({
-                                          "name": user.author,
-                                          "pass": user.password,
-                                          "eamil": user.email
-                                        });
-
                                         await signUp(
                                             email: _email.text,
                                             pass: _pass.text);
                                       } else {
                                         ScaffoldMessenger.of(context)
-                                            .showSnackBar(SnackBar(
+                                            .showSnackBar(const SnackBar(
                                                 content: Text(
                                                     'Password is not Same')));
                                       }
@@ -361,45 +332,50 @@ class _SignUPState extends State<SignUP> {
                                 )
                               ],
                             ),
-                            Card(
-                              elevation: 10,
-                              child: Container(
-                                height: h * 0.1,
-                                width: w * 0.6,
-                                child: InkWell(
-                                  onTap: () async {
-                                    User? user = await signInWithGoogle();
+                            Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        offset: Offset(0, 3), blurRadius: 10)
+                                  ],
+                                  color: Colors.white),
+                              height: h * 0.1,
+                              width: w * 0.6,
+                              child: InkWell(
+                                onTap: () async {
+                                  User? user = await signInWithGoogle();
 
-                                    if (user != null) {
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Homepage()));
-                                    } else {
-                                      print('error');
-                                    }
-                                  },
-                                  child: Row(
-                                    children: [
-                                      Image.asset(
-                                        'assets/pngwing.com (7).png',
-                                        fit: BoxFit.fitHeight,
-                                      ),
-                                      Text(
-                                        'Google SignIn',
-                                        style: GoogleFonts.ubuntu(
-                                            fontWeight: FontWeight.bold),
-                                      )
-                                    ],
-                                  ),
+                                  if (user != null) {
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Homepage()));
+                                  } else {
+                                    print('error');
+                                  }
+                                },
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Image.asset(
+                                      'assets/pngwing.com (7).png',
+                                      fit: BoxFit.fitHeight,
+                                    ),
+                                    Text(
+                                      'Google SignIn',
+                                      style: GoogleFonts.ubuntu(
+                                          fontWeight: FontWeight.bold),
+                                    )
+                                  ],
                                 ),
                               ),
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Already a User ?'),
+                                const Text('Already a User ?'),
                                 TextButton(
                                     onPressed: () {
                                       Navigator.pushReplacement(

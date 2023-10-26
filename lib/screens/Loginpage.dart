@@ -1,11 +1,13 @@
+import 'package:blog_app/Auth/auth.dart';
 import 'package:blog_app/constant/constant.dart';
+import 'package:blog_app/constant/google.dart';
 import 'package:blog_app/screens/homepage.dart';
 import 'package:blog_app/screens/sigup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_login/flutter_login.dart';
+
 import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
@@ -16,6 +18,37 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  void _login() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: Colors.blue,
+            ),
+          );
+        });
+    try {
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: _email.text, password: _pass.text);
+    } on FirebaseException catch (e) {
+      if (e.code == 'user-not-found') {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("User Not Found")));
+      } else if (e.code == 'wrong-password') {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Wrong Password")));
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Unknown Error Occured")));
+      }
+    }
+
+    Navigator.pop(context);
+  }
+
   Future<void> resetPassword(String email) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
@@ -56,6 +89,9 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => Homepage()));
     } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password') {
+        print('user not found');
+      }
       print(e.toString());
 
       // ignore: unnecessary_null_comparison
@@ -95,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: h * 0.7,
                   width: w,
                   child: Form(
-                      key: UniqueKey(),
+                      key: _formKey,
                       child: Container(
                         alignment: Alignment.topCenter,
                         padding: EdgeInsets.all(w * 0.02),
@@ -118,17 +154,20 @@ class _LoginPageState extends State<LoginPage> {
                                         vertical: h * 0.03),
                                     child: TextFormField(
                                         validator: (text) {
-                                          if (text == null || text.isEmpty) {
-                                            return 'Title Must not be Empty';
+                                          if (text == null ||
+                                              text.isEmpty ||
+                                              !text.contains('@')) {
+                                            return 'Error Email';
                                           } else {
                                             return null;
                                           }
                                         },
                                         controller: _email,
+                                        textInputAction: TextInputAction.next,
                                         onSaved: (text) {},
                                         cursorColor: Constant().blue,
                                         decoration: InputDecoration(
-                                          suffixIcon: Icon(
+                                          suffixIcon: const Icon(
                                             Icons.email_outlined,
                                             color: Colors.black,
                                           ),
@@ -149,14 +188,17 @@ class _LoginPageState extends State<LoginPage> {
                                     child: TextFormField(
                                         cursorColor: Constant().blue,
                                         validator: (text) {
-                                          if (text == null || text.isEmpty) {
-                                            return 'Content Must not be Empty';
+                                          if (text == null ||
+                                              text.isEmpty ||
+                                              text.length <= 6) {
+                                            return 'Password error';
                                           } else {
                                             return null;
                                           }
                                         },
                                         controller: _pass,
                                         obscureText: obs,
+                                        textInputAction: TextInputAction.done,
                                         onSaved: (text) {},
                                         decoration: InputDecoration(
                                             suffixIcon: IconButton(
@@ -206,10 +248,19 @@ class _LoginPageState extends State<LoginPage> {
                                   alignment: Alignment.center,
                                   child: ElevatedButton(
                                     onPressed: () async {
-                                      if (_email.text != _pass.text) {
-                                        await signIn(
+                                      if (_formKey.currentState!.validate()) {
+                                        await Auth().signIn(
                                             email: _email.text,
                                             pass: _pass.text);
+                                        if (Auth().currentUser != null) {
+                                          Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      Homepage()));
+                                        }
+                                      } else {
+                                        print('error');
                                       }
                                     },
                                     child: Text(
@@ -229,37 +280,42 @@ class _LoginPageState extends State<LoginPage> {
                                 )
                               ],
                             )),
-                            Card(
-                              elevation: 10,
-                              child: Container(
-                                height: h * 0.1,
-                                width: w * 0.6,
-                                child: InkWell(
-                                  onTap: () async {
-                                    User? user = await signInWithGoogle();
-                                    if (user != null) {
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Homepage()));
-                                    } else {
-                                      print('error');
-                                    }
-                                  },
-                                  child: Row(
-                                    children: [
-                                      Image.asset(
-                                        'assets/pngwing.com (7).png',
-                                        fit: BoxFit.fitHeight,
-                                      ),
-                                      Text(
-                                        'Google SignIn',
-                                        style: GoogleFonts.ubuntu(
-                                            fontWeight: FontWeight.bold),
-                                      )
-                                    ],
-                                  ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        offset: Offset(0, 3), blurRadius: 10)
+                                  ],
+                                  color: Colors.white),
+                              height: h * 0.1,
+                              width: w * 0.6,
+                              child: InkWell(
+                                onTap: () async {
+                                  User? user = await signInWithGoogle();
+                                  if (user != null) {
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Homepage()));
+                                  } else {
+                                    print('error');
+                                  }
+                                },
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Image.asset(
+                                      'assets/pngwing.com (7).png',
+                                      fit: BoxFit.fitHeight,
+                                    ),
+                                    Text(
+                                      'Google SignIn',
+                                      style: GoogleFonts.ubuntu(
+                                          fontWeight: FontWeight.bold),
+                                    )
+                                  ],
                                 ),
                               ),
                             ),
@@ -284,6 +340,201 @@ class _LoginPageState extends State<LoginPage> {
                 bottom: h * 0.08,
               )
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LoginField extends StatefulWidget {
+  const LoginField({super.key});
+
+  @override
+  State<LoginField> createState() => _LoginFieldState();
+}
+
+class _LoginFieldState extends State<LoginField> {
+  final _formkey = GlobalKey<FormState>();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _pass = TextEditingController();
+  final style = GoogleFonts.poppins();
+  var tapcolor = Colors.white;
+  final _color = Colors.black;
+  void _login() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: Colors.blue,
+            ),
+          );
+        });
+    try {
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: _email.text, password: _pass.text);
+    } on FirebaseException catch (e) {
+      if (e.code == 'user-not-found') {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("User Not Found")));
+      } else if (e.code == 'wrong-password') {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Wrong Password")));
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Unknown Error Occured")));
+      }
+    }
+
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final h = MediaQuery.sizeOf(context).height;
+    final w = MediaQuery.sizeOf(context).width;
+    return Scaffold(
+      backgroundColor: Colors.cyan.shade200,
+      body: Container(
+        color: Colors.white,
+        height: h,
+        child: Padding(
+          padding: const EdgeInsets.all(50),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  height: h * 0.2,
+                  child: Image.asset(
+                    "images/loginimage.jpg",
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                SizedBox(
+                  height: h * 0.05,
+                ),
+                Form(
+                    key: _formkey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextFormField(
+                          controller: _email,
+                          validator: (value) {
+                            if (value == null ||
+                                value.trim().isEmpty ||
+                                !value.contains('@')) {
+                              return "Enter a valid email ";
+                            } else {
+                              return null;
+                            }
+                          },
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                              filled: true,
+                              suffixIcon: Icon(Icons.account_circle),
+                              suffixIconColor: _color,
+                              fillColor: Colors.transparent,
+                              label: Text(
+                                'Email',
+                                style: style,
+                              ),
+                              labelStyle: TextStyle(color: _color),
+                              hintText: '',
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: _color),
+                                borderRadius: BorderRadius.circular(23),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: _color),
+                                borderRadius: BorderRadius.circular(23),
+                              )),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.sizeOf(context).height * 0.02,
+                        ),
+                        TextFormField(
+                          controller: _pass,
+                          validator: (val) {
+                            if (val == null || val.trim().length < 7) {
+                              return 'Password must be of 7 characters';
+                            } else {
+                              return null;
+                            }
+                          },
+                          obscureText: true,
+                          decoration: InputDecoration(
+                              labelStyle: TextStyle(color: _color),
+                              filled: true,
+                              suffixIconColor: _color,
+                              suffixIcon: Icon(Icons.lock_outline_rounded),
+                              fillColor: Colors.transparent,
+                              label: Text(
+                                'Password',
+                                style: style,
+                              ),
+                              hintText: '',
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: _color),
+                                borderRadius: BorderRadius.circular(23),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: _color),
+                                borderRadius: BorderRadius.circular(23),
+                              )),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.sizeOf(context).height * 0.02,
+                        ),
+                        InkWell(
+                          onTap: _login,
+                          child: Container(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Login',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.white, fontSize: 19),
+                            ),
+                            width: double.infinity,
+                            height: 50,
+                            decoration: BoxDecoration(
+                                color: Colors.cyan,
+                                borderRadius: BorderRadius.circular(23)),
+                          ),
+                        ),
+                        SizedBox(
+                          height: h * 0.02,
+                        ),
+                        GestureDetector(
+                          onTap: () => googleAuth().signin(),
+                          child: Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.cyan),
+                                  borderRadius: BorderRadius.circular(20)),
+                              height: h * 0.1,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Image.asset('images/google.jpg'),
+                                  Text(
+                                    "Sign In Using Google",
+                                    style: GoogleFonts.poppins(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold),
+                                  )
+                                ],
+                              )),
+                        )
+
+                        //mail
+                      ],
+                    )),
+              ],
+            ),
           ),
         ),
       ),

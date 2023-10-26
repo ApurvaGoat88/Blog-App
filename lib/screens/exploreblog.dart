@@ -1,4 +1,5 @@
 import 'package:blog_app/constant/constant.dart';
+import 'package:blog_app/model/ModelWidget.dart';
 import 'package:flutter/material.dart';
 
 class ExploreBlogs extends StatefulWidget {
@@ -12,9 +13,8 @@ class _ExploreBlogsState extends State<ExploreBlogs> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
       color: Constant().plat,
-      child: Text('explore'),
+      child: ModelWidget(),
     );
   }
 }

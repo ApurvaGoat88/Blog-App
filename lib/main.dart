@@ -5,15 +5,14 @@ import 'package:blog_app/provider/user-provider.dart';
 import 'package:blog_app/screens/homepage.dart';
 import 'package:blog_app/screens/startpage.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  FirebaseDatabase.instance.setPersistenceEnabled(true);
-  FirebaseDatabase.instance.reference().keepSynced(true);
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MyApp());
 }
@@ -40,9 +39,9 @@ class _MyAppState extends State<MyApp> {
             stream: Auth().authState,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return Homepage();
+                return const  Homepage();
               } else {
-                return StartPage();
+                return const StartPage();
               }
             },
           ),
