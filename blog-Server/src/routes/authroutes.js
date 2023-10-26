@@ -26,16 +26,22 @@ router.get('/failure', authController.failure);
 // Create a new blog
 router.post('/blogs', authMiddleware, blogController.createBlog);
 
+// explore all the blogs
+router.get('/blogs',blogController.getAllBlogs);
+
+// explore a single blog
+    router.get('/blogs/:blogId/',blogController.getBlogById);
+
 //Update in a blog 
-router.post('/blogs/:blogId/update',authMiddleware,blogController.updateBlog)
+router.post('/blogs/:blogId/update/',blogController.updateBlog)
 
 // Delete a blog
-router.delete('/blogs/:blogId/delete', authMiddleware, blogController.deleteBlog);
+router.delete('/blogs/:blogId/delete/', blogController.deleteBlog);
 
 // Create a comment on a blog
-router.post('/blogs/:blogId/comments', authMiddleware, blogController.createComment);
+router.post('/blogs/:blogId/comments/',authMiddleware , blogController.createComment);
 
 // Create a like on a blog
-router.post('/blogs/:blogId/like', authMiddleware, blogController.likeBlog);
+router.post('/blogs/:blogId/like/',authMiddleware, blogController.likeBlog);
 
 module.exports = router;
