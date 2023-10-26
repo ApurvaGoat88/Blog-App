@@ -245,3 +245,89 @@ exports.createBlog = async (req, res) => {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   };
+
+
+
+//login test
+
+{ message: 'Internal Server Error' }
+
+//
+
+exports.login = async (req, res) => {
+  passport.authenticate('local', (err, user) => {
+    if (err) {
+      console.error(err);
+      console.log("login error");
+      return res.status(500).json(err);
+    }
+
+    if (!user) {
+      return res.status(401).json({ message: 'Login failed' });
+    }
+
+    // Generate a token for the authenticated user
+    const token = jwt.sign({ userId: user._id, email: user.email }, secretKey, { expiresIn: '1h' });
+
+    res.json({ message: 'Login successful', token });
+  })(req, res);
+};
+
+
+//
+exports.getBlogById = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.blogId).populate('author', 'email');
+
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+
+    res.json(blog);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+//
+
+
+// authMiddleware.js
+
+const jwt = require('jsonwebtoken');
+const { secretKey } = require('../config'); // You need to define your secret key
+
+const authMiddleware = (req, res, next) => {
+  // Check for the presence of the 'Authorization' header
+  const token = req.header('Authorization');
+  console.log('Received Token:', token);
+
+  if (!token) {
+    console.log('Unauthorized - No token provided');
+    return res.status(401).json({ error: 'Unauthorized - No token provided' });
+  }
+  console.log("token is matched");
+  try {
+    // Verify the token
+    const token1 = token.split(' ')[1];
+    const decoded = jwt.verify(token1, secretKey);
+    console.log("token is being verified");
+
+    // Attach the decoded user information to the request object
+    console.log("req user --",req)
+    console.log("req user --",decoded.userId)
+
+    // console.log("tooken==> ", token1);
+    // console.log("response==> ",decoded);
+    // console.log('Token verified successfully:', decoded.userId);
+    if(req.body.userId === decoded.userId){
+    next();}
+    // Continue to the next middleware or route handler
+  } catch (error) {
+    console.error(error);
+    return res.status(401).json({ error: 'Unauthorized - Invalid token' });
+  }
+};
+
+module.exports = authMiddleware;

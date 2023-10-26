@@ -5,26 +5,29 @@ const { secretKey } = require('../config'); // You need to define your secret ke
 
 const authMiddleware = (req, res, next) => {
   // Check for the presence of the 'Authorization' header
-  const token = req.header('Authorization');
+  try {
+  const firstToken = req.header('Authorization');
+  const token = firstToken.split(' ')[1];
+  console.log(token);
 
   if (!token) {
     console.log('Unauthorized - No token provided');
     return res.status(401).json({ error: 'Unauthorized - No token provided' });
   }
 
-  try {
     // Verify the token
     const decoded = jwt.verify(token, secretKey);
+    console.log(decoded.user);
 
     // Attach the decoded user information to the request object
-    req.user = decoded.user;
+    req.body._id = decoded?.id;
 
     console.log('Token verified successfully:', decoded.user);
 
     next(); // Continue to the next middleware or route handler
   } catch (error) {
     console.error(error);
-    return res.status(401).json({ error: 'Unauthorized - Invalid token' });
+    return res.status(401).json(error.message);
   }
 };
 

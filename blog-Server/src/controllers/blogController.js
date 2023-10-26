@@ -1,15 +1,17 @@
 // blogController.js
 const Blog = require('../models/blog');
+const mongoose = require('mongoose');
 
 // Create a new blog
 exports.createBlog = async (req, res) => {
+  console.log("accepting the create request");
   try {
     const { title, content } = req.body;
-    const author = req.user.userId;
+    // const author = req.user.userId;
+    const author = "random name";
+    console.log('Received request to create a new blog:', { title, content });
 
-    console.log('Received request to create a new blog:', { title, content, author });
-
-    const blog = new Blog({ title, content, author });
+    const blog = new Blog({ title, content });
     await blog.save();
 
     console.log('Blog created successfully:', blog);
@@ -17,7 +19,7 @@ exports.createBlog = async (req, res) => {
     res.json({ message: 'Blog created successfully', blog });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal Server 3 Error' });
   }
 };
 
@@ -33,9 +35,17 @@ exports.getAllBlogs = async (req, res) => {
 };
 
 // Get a single blog by ID
+
 exports.getBlogById = async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.blogId).populate('author', 'email');
+    const blogId = req.params.blogId;
+
+    // Validate that blogId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(blogId)) {
+      return res.status(400).json({ error: 'Invalid blog ID' });
+    }
+
+    const blog = await Blog.findById(blogId).populate('author', 'email');
 
     if (!blog) {
       return res.status(404).json({ error: 'Blog not found' });
@@ -47,6 +57,7 @@ exports.getBlogById = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 // Update a blog by ID
 exports.updateBlog = async (req, res) => {

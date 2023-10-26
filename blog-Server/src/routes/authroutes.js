@@ -23,6 +23,14 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
 router.get('/success', authController.success);
 router.get('/failure', authController.failure);
 
+// Create a new blog
+router.post('/blogs', authMiddleware, blogController.createBlog);
+
+//Update in a blog 
+router.post('/blogs/:blogId/update',authMiddleware,blogController.updateBlog)
+
+// Delete a blog
+router.delete('/blogs/:blogId/delete', authMiddleware, blogController.deleteBlog);
 
 // Create a comment on a blog
 router.post('/blogs/:blogId/comments', authMiddleware, blogController.createComment);

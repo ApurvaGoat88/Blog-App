@@ -5,9 +5,8 @@ const router = express.Router();
 const blogController = require('../controllers/blogController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-
-// Create a new blog
-router.post('/', authMiddleware, blogController.createBlog);
+//for creating a blog post
+router.post('/blogs', blogController.createBlog)
 
 // Get all blogs
 router.get('/', blogController.getAllBlogs);

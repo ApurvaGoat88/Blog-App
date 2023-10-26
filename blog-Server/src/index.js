@@ -3,10 +3,12 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const cors = require('cors');
+const nodemon = require('nodemon');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const authroutes = require('./routes/authroutes');
 const blogroutes = require('./routes/blogroutes');
+const User = require('./models/user');
 
 const app = express();
 
@@ -37,8 +39,17 @@ mongoose.connect('mongodb://127.0.0.1:27017/blogging-platform', {
 passport.use(
   new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
     try {
-      // ... (rest of the strategy)
+      const user = await User.findOne({ email });
+
+      if (!user || !user.comparePassword(password)) {
+        // User not found or invalid password
+        return done(null, false, { message: 'Invalid credentials' });
+      }
+
+      // User and password are correct
+      return done(null, user);
     } catch (error) {
+      console.error(error);
       return done(error);
     }
   })
