@@ -11,3 +11,9 @@
 ![Alt text](Screenshot_20231024-124711.png)
 # sign up Page
 ![Alt text](Screenshot_20231024-124714.png)
+# Explore_BLog page
+ ![Alt text](Screenshot_20231028-224550.png)
+ # Create Blog page
+  ![Alt text](Screenshot_20231028-224558.png)
+ # profile page 
+  ![Alt text](Screenshot_20231028-224603.png)
