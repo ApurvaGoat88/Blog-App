@@ -18,30 +18,18 @@ class _MyBlogs2State extends State<MyBlogs2> {
   CollectionReference _collectionRef =
       FirebaseFirestore.instance.collection('AllBlogs');
 
-  CollectionReference _userref =
-      FirebaseFirestore.instance.collection('AllBlogs');
-
   Future<void> getData() async {
-    // Get docs from collection reference
     QuerySnapshot querySnapshot = await _collectionRef.get();
-    QuerySnapshot userSnapshots = await _userref.get();
 
-    // Get data from docs and convert map to List
     final allData = querySnapshot.docs
         .map(
           (e) => e.data(),
         )
         .toList();
-    final userData = userSnapshots.docs
-        .map(
-          (e) => e.data(),
-        )
-        .toList();
-
     print(allData);
   }
 
-  getExpenseItems(AsyncSnapshot<QuerySnapshot> snapshot) {
+  getBlogs(AsyncSnapshot<QuerySnapshot> snapshot) {
     final w = MediaQuery.sizeOf(context).width;
     final h = MediaQuery.sizeOf(context).height;
 
@@ -78,11 +66,15 @@ class _MyBlogs2State extends State<MyBlogs2> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Text(
-                                  doc['title'],
-                                  style: GoogleFonts.ubuntu(fontSize: h * 0.04),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                Container(
+                                  alignment: Alignment.topCenter,
+                                  child: Text(
+                                    doc['title'],
+                                    style:
+                                        GoogleFonts.ubuntu(fontSize: h * 0.04),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                                 Text(
                                   doc['user'],
@@ -130,8 +122,13 @@ class _MyBlogs2State extends State<MyBlogs2> {
     return StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection("AllBlogs").snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) return Text("Please Add Blogs");
-          return Card(child: getExpenseItems(snapshot));
+          if (!snapshot.hasData)
+            return Center(
+              child: CircularProgressIndicator(
+                color: Colors.pink,
+              ),
+            );
+          return Card(child: getBlogs(snapshot));
         });
   }
 }

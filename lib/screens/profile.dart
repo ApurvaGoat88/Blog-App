@@ -46,7 +46,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         margin: EdgeInsets.only(top: h * 0.05),
                         child: CircleAvatar(
                           radius: 60,
-                          child: Icon(Icons.person),
+                          backgroundColor: Colors.white,
+                          child: Image.asset(
+                            'assets/—Pngtree—businessman user avatar wearing suit_8385663.png',
+                            height: 80,
+                          ),
                         ),
                       ),
                       SizedBox(
