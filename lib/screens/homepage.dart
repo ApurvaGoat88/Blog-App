@@ -47,22 +47,6 @@ class _HomepageState extends State<Homepage> {
           ),
         ),
         actions: [
-          current_index == 0
-              ? Container(
-                  margin: EdgeInsets.only(right: 20),
-                  child: Card(
-                    color: Constant().plat,
-                    shape: CircleBorder(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: IconButton(
-                          onPressed: () {},
-                          icon:
-                              SvgPicture.asset('assets/grid-svgrepo-com.svg')),
-                    ),
-                  ),
-                )
-              : Center(),
           current_index == 2
               ? Container(
                   margin: EdgeInsets.only(right: 20),
@@ -98,8 +82,8 @@ class _HomepageState extends State<Homepage> {
         ),
       ),
       bottomNavigationBar: CurvedNavigationBar(
-          backgroundColor: Colors.transparent,
-          height: h * 0.07,
+          backgroundColor: Colors.white,
+          height: h * 0.08,
           buttonBackgroundColor: Colors.pink.shade200,
           animationDuration: Duration(milliseconds: 500),
           onTap: (index) {

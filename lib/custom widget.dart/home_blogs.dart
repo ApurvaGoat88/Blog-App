@@ -6,24 +6,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class MyBlogs extends StatefulWidget {
-  const MyBlogs({super.key});
+class MyBlogs2 extends StatefulWidget {
+  const MyBlogs2({super.key});
 
   @override
-  State<MyBlogs> createState() => _MyBlogsState();
+  State<MyBlogs2> createState() => _MyBlogs2State();
 }
 
-class _MyBlogsState extends State<MyBlogs> {
+class _MyBlogs2State extends State<MyBlogs2> {
   final currentUser = FirebaseAuth.instance.currentUser;
   CollectionReference _collectionRef =
-      FirebaseFirestore.instance.collection('Blogs');
+      FirebaseFirestore.instance.collection('AllBlogs');
+
+  CollectionReference _userref =
+      FirebaseFirestore.instance.collection('AllBlogs');
 
   Future<void> getData() async {
     // Get docs from collection reference
     QuerySnapshot querySnapshot = await _collectionRef.get();
+    QuerySnapshot userSnapshots = await _userref.get();
 
     // Get data from docs and convert map to List
     final allData = querySnapshot.docs
+        .map(
+          (e) => e.data(),
+        )
+        .toList();
+    final userData = userSnapshots.docs
         .map(
           (e) => e.data(),
         )
@@ -32,7 +41,7 @@ class _MyBlogsState extends State<MyBlogs> {
     print(allData);
   }
 
-  getBlogs(AsyncSnapshot<QuerySnapshot> snapshot) {
+  getExpenseItems(AsyncSnapshot<QuerySnapshot> snapshot) {
     final w = MediaQuery.sizeOf(context).width;
     final h = MediaQuery.sizeOf(context).height;
 
@@ -43,13 +52,12 @@ class _MyBlogsState extends State<MyBlogs> {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: AssetImage(
-                            'assets/digital-painted-portrait-of-lion-picjumbo-com.jpg'),
+                        image: AssetImage('assets/Android Large - 1 (2).png'),
                         fit: BoxFit.cover)),
                 child: Padding(
-                  padding: EdgeInsets.all(w * 0.1),
+                  padding: EdgeInsets.all(w * 0.05),
                   child: Container(
-                    margin: EdgeInsets.only(top: h * 0.4),
+                    margin: EdgeInsets.only(top: h * 0.01),
                     decoration: BoxDecoration(
                         color: Constant().plat,
                         borderRadius: BorderRadius.circular(34),
@@ -58,18 +66,42 @@ class _MyBlogsState extends State<MyBlogs> {
                         ]),
                     width: w * 0.8,
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           Container(
                             alignment: Alignment.center,
+
                             padding: EdgeInsets.all(10),
-                            height: h * 0.12,
+
+                            height: h * .7,
                             // color: Colors.redAccent,
-                            child: Text(
-                              doc['title'],
-                              style: GoogleFonts.ubuntu(fontSize: h * 0.017),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  doc['title'],
+                                  style: GoogleFonts.ubuntu(fontSize: h * 0.04),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  doc['user'],
+                                  style: GoogleFonts.ubuntu(
+                                      fontSize: h * 0.01, color: Colors.red),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Divider(
+                                  color: Colors.black,
+                                ),
+                                Text(
+                                  doc['content'],
+                                  style: GoogleFonts.ubuntu(
+                                      fontSize: h * 0.01, color: Colors.black),
+                                  maxLines: 30,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
                           ),
                         ]),
@@ -79,15 +111,14 @@ class _MyBlogsState extends State<MyBlogs> {
             ))
         .toList();
     return PageView.builder(
+      scrollDirection: Axis.vertical,
       physics: BouncingScrollPhysics(),
       itemCount: snapshot.data!.docs.length,
       itemBuilder: (context, index) {
-        return snapshot.data!.docs.length == 0
-            ? Card(child: Center(child: Text('PLEASE ADD BLOGS')))
-            : Card(
-                color: Constant().plat,
-                child: snap[index],
-              );
+        return Card(
+          color: Constant().plat,
+          child: snap[index],
+        );
       },
     );
   }
@@ -97,14 +128,10 @@ class _MyBlogsState extends State<MyBlogs> {
     final w = MediaQuery.sizeOf(context).width;
     final h = MediaQuery.sizeOf(context).height;
     return StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection("Blogs")
-            .doc(currentUser!.email!.split('@')[0].toString())
-            .collection(currentUser!.email!.split('@')[0].toString())
-            .snapshots(),
+        stream: FirebaseFirestore.instance.collection("AllBlogs").snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return Text("Please Add Blogs");
-          return Card(child: getBlogs(snapshot));
+          return Card(child: getExpenseItems(snapshot));
         });
   }
 }
