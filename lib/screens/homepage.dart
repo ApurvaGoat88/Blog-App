@@ -96,7 +96,7 @@ class _HomepageState extends State<Homepage> {
           },
           items: [
             Icon(Icons.home_filled, size: 30, color: Constant().blue),
-            Icon(Icons.create_sharp, size: 30, color: Constant().blue),
+            Icon(Icons.add, size: 30, color: Constant().blue),
             Icon(Icons.person, size: 30, color: Constant().blue),
           ]),
     );

@@ -200,11 +200,11 @@ class _MyBlogsState extends State<MyBlogs> {
                                     await deleteData(doc['title']);
                                   },
                                   icon: Icon(Icons.delete)),
-                              IconButton(
-                                  onPressed: () {
-                                    _showEditBox(context, doc['title']);
-                                  },
-                                  icon: Icon(Icons.edit))
+                              // IconButton(
+                              //     onPressed: () {
+                              //       _showEditBox(context, doc['title']);
+                              //     },
+                              //     icon: Icon(Icons.edit))
                             ],
                           ),
                           Container(
