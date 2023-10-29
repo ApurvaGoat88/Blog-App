@@ -107,40 +107,13 @@ exports.deleteBlog = async (req, res) => {
   }
 };
 
-//create a comment 
 
-/*exports.createComment = async (req, res) => {
-  console.log("Accept the comment on a blog request");
-  try {
-    const  blogId  = req.params.blogId;
-    const  text  = req.body;
-
-    const blog = await Blog.findById(blogId);
-
-    if (!blog) {
-      return res.status(404).json({ error: 'Blog not found' });
-    }
-
-    const newComment = {
-      text,
-      
-    };
-
-    blog.comments.push(newComment);
-    await blog.save();
-
-    res.json({ message: 'Comment added successfully', comments: blog.comments });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};*/
 // Create a comment on a blog
 exports.createComment = async (req, res) => {
   console.log("Accept the comment on a blog request");
   try {
     const blogId = req.params.blogId;
-    const { text } = req.body; 
+    const text = req.body.text; // Assuming the comment text is sent in the request body
 
     const blog = await Blog.findById(blogId);
 
@@ -148,13 +121,8 @@ exports.createComment = async (req, res) => {
       return res.status(404).json({ error: 'Blog not found' });
     }
 
-    const newComment = {
-      text,
-      // Add any other properties you want to include in the comment
-      blogId // Assuming you want to associate the comment with a user
-    };
-
-    blog.comments.push(newComment);
+    // Push the comment text as a string into the "comments" array
+    blog.comments.push(text);
     await blog.save();
 
     res.json({ message: 'Comment added successfully', comments: blog.comments });
@@ -163,6 +131,7 @@ exports.createComment = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 // Create a like on a blog

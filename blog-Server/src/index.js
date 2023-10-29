@@ -1,3 +1,4 @@
+
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
@@ -9,6 +10,8 @@ const LocalStrategy = require('passport-local').Strategy;
 const authroutes = require('./routes/authroutes');
 const blogroutes = require('./routes/blogroutes');
 const User = require('./models/user');
+const auth = require('../src/auth.js');
+const db = require('../db');
 
 const app = express();
 
@@ -18,7 +21,7 @@ app.use(express.json());
 // Use express-session middleware
 app.use(
   session({
-    secret: 'bdcoe.akgec123', // Replace with a strong and secure secret key
+    secret: 'bdcoe.akgec123', 
     resave: false,
     saveUninitialized: true,
     store: MongoStore.create({ mongoUrl: 'mongodb://127.0.0.1:27017/blogging-platform' }),
@@ -55,6 +58,8 @@ passport.use(
   })
 );
 
+
+
 // Passport Serialization/Deserialization
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -71,6 +76,18 @@ passport.deserializeUser(async (id, done) => {
 // Use auth routes
 app.use('/api', authroutes);
 app.use('/api', blogroutes);
+
+//google authentication
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['email'] }));
+
+app.get('/auth/google/callback', 
+  passport.authenticate('google', { 
+     successRedirect:'/auth/google/success',
+     failurRedirect:'/auth/google/failure'
+  }));
+
+  //
 
 app.get('/', (req, res) => {
   res.send('Hello, this is the root path!!');

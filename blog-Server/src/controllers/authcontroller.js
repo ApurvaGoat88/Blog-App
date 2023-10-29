@@ -9,6 +9,8 @@ const { validationResult } = require('express-validator');
 const Blog = require('../models/blog');
 const mongoose = require('mongoose');
 
+
+
 exports.signup = async (req, res) => {
   console.log("accepted the sign up request");
   try {
@@ -20,7 +22,7 @@ exports.signup = async (req, res) => {
     await user.save();
 
     // Generate a token for the newly created user
-    const token = jwt.sign({ userId: user._id, email: user.email }, secretKey, { expiresIn: '3h' });
+    const token = jwt.sign({ userId: user._id, email: user.email }, secretKey, { expiresIn: '1h' });
 
     res.json({ message: 'Signup successful', token });
   } catch (error) {
@@ -40,6 +42,7 @@ exports.login = async (req, res) => {
       console.log("Login error");
       return res.status(500).json(err);
     }
+
 
     if (!user) {
       console.log("Login failed: Invalid credentials");
@@ -93,7 +96,7 @@ exports.failure = (req, res) => {
   res.status(401).json({ message: 'Login failed' });
 };
 
-
+/*
 exports.createBlog = async (req, res) => {
   console.log("request for creating a blog");
   try {
@@ -105,7 +108,7 @@ exports.createBlog = async (req, res) => {
 
     // Extract necessary data from the request
     const { title, content } = req.body;
-    const author = req.user.userId;
+   // const author = req.user.userId;
 
     // Create a new blog
     const blog = new Blog({ title, content, author });
@@ -137,7 +140,7 @@ exports.createBlog = async (req, res) => {
     // Generic error response for unexpected errors
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-};
+}; */
 
 
 

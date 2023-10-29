@@ -1,12 +1,16 @@
-// routes/blogs.js
+// routes/blogroutes.js
 
 const express = require('express');
 const router = express.Router();
 const blogController = require('../controllers/blogController');
 const authMiddleware = require('../middleware/authMiddleware');
 
+
+
 //for creating a blog post
 router.post('/blogs', blogController.createBlog)
+
+
 
 // Get all blogs
 router.get('/', blogController.getAllBlogs);
@@ -25,5 +29,6 @@ router.post('/:blogId/comments', authMiddleware, blogController.createComment);
 
 // Create a like on a blog
 router.post('/:blogId/like', authMiddleware, blogController.likeBlog);
+
 
 module.exports = router;
