@@ -1,8 +1,11 @@
 import 'package:blog_app/constant/constant.dart';
-import 'package:blog_app/screens/homepage.dart';
+import 'package:blog_app/provider/blog_provider.dart';
+import 'package:blog_app/screens/Loginpage.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class StartPage extends StatefulWidget {
   const StartPage({super.key});
@@ -12,6 +15,13 @@ class StartPage extends StatefulWidget {
 }
 
 class _StartPageState extends State<StartPage> {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Provider.of<BlogProvider>(context, listen: false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final h = MediaQuery.sizeOf(context).height;
@@ -64,7 +74,7 @@ class _StartPageState extends State<StartPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (context) => Homepage()));
+                          MaterialPageRoute(builder: (context) => LoginPage()));
                     },
                     child: Text(
                       'Get Started',
